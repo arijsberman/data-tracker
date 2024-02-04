@@ -1,2 +1,2 @@
 APP_TITLE = "My Tkinter App"
-DATA_FILE_PATH = "data.txt"
+DATABASE_PATH = "data/app_database.db"
