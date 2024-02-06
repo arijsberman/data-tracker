@@ -1,7 +1,7 @@
 import pandas as pd
 import sqlite3
 
-class DataProcessor:
+class DatabaseManager:
     def __init__(self, database_path):
         self.path = database_path
     
@@ -30,7 +30,6 @@ class DataProcessor:
         # Close database connection
         self.close()
 
-        print(exists)
         return exists
 
     def create_table_from_dataframe(self, df, table_name):
@@ -107,7 +106,6 @@ class DataProcessor:
         # Close the connection to the database
         self.close()
 
-        print(df)
         return df
 
 
