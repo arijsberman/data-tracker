@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk 
 
 class MainWindow:
     def __init__(self, master, layout=(1, 1), title='Title Placeholder'):
@@ -47,6 +48,17 @@ class MainWindow:
         label = tk.Label(self.master, text=text_messge)
         label.grid(row=row,column=column, columnspan=columnspan)
         return label
+    
+    def add_entry(self, row, column):
+        entry = tk.Entry(self.master)
+        entry.grid(row=row,column=column)
+        return entry
+    
+    def add_dropdown(self, options, row, column):
+        dropdown = ttk.Combobox(self.master, values=options)
+        dropdown.grid(row=row, column=column)
+        dropdown.set(options[0]) 
+        return dropdown
 
 
 class NewWindow(MainWindow):

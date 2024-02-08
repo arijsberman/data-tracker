@@ -94,20 +94,48 @@ class DatabaseManager:
         Returns:
         - A pandas DataFrame containing the data from the specified SQL table.
         """
-        # Create a connection to the database
-        self.open()
-        
-        # Construct the SQL query
-        query = f"SELECT * FROM {table_name}"
-        
-        # Execute the query and return the results as a DataFrame
-        df = pd.read_sql_query(query, self.conn)
-        
-        # Close the connection to the database
-        self.close()
+        try:
+            # Create a connection to the database
+            self.open()
+            
+            # Construct the SQL query
+            query = f"SELECT * FROM {table_name}"
+            
+            # Execute the query and return the results as a DataFrame
+            df = pd.read_sql_query(query, self.conn)
+            
+            # Close the connection to the database
+            self.close()
 
-        return df
+            return df
+        except Exception as e:
+            print(f"Error: {e}.")
+            
+            # Close the connection if an error occurs
+            self.close()
+            
+            return None
 
+    def append_row_to_table(self, table_name, row):
+        # If table doesn't exist, create it first
+        if not self.table_exists(table_name):
+            # Create table from row
+            self.create_table_from_dataframe(pd.DataFrame([row], index=[0]), table_name)
+        else:
+            # Open connection to db
+            self.open()
+            
+            # Create SQL query
+            columns = ', '.join(row.keys())
+            placeholders = ', '.join('?' * len(row))
+            insert_sql = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
+
+            # Execute SQL query
+            self.cur.execute(insert_sql, tuple(row.values()))
+            self.conn.commit()
+
+            # Close connection
+            self.close()
 
 # Testing
 # processor = DataProcessor("data/app_database.db")
