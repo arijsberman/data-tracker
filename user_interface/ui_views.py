@@ -1,4 +1,5 @@
 import pandas as pd
+from datetime import datetime 
 from tkinter import simpledialog, messagebox
 
 from user_interface.ui_components import MainWindow, NewWindow
@@ -75,8 +76,9 @@ class DataCollector(HomePage):
     def create_layout(self):
         if isinstance(self.config, pd.DataFrame):
             answer = {}
+            answer['datetime'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             for _, row in self.config.iterrows():
                 answer[row.colname] = messagebox.askquestion("Question", row.question)
-            print(answer)
+            self.controller.save_response(answer)
         else:
-            messagebox.showerror('Whadupp', "No data to collect")
+            messagebox.showerror('', "No data to collect")

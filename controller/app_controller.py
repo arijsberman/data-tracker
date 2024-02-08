@@ -1,5 +1,6 @@
 import tkinter as tk
-import pandas as pd
+import ctypes
+import time
 
 from user_interface.ui_views import HomePage, DataCollector
 from app_logic.database_manager import DatabaseManager
@@ -44,3 +45,33 @@ class AppController:
 
         # Update view with new config data
         self.home_page.update_config(self.config_data)
+
+    def save_response(self, row_to_append):
+        self.db.append_row_to_table('responses', row_to_append)
+
+        print(self.db.get_dataframe_from_table('responses'))
+
+    def get_idle_duration(self):
+        lii = LASTINPUTINFO()
+        lii.cbSize = ctypes.sizeof(LASTINPUTINFO)
+        ctypes.windll.user32.GetLastInputInfo(ctypes.byref(lii))
+        millis = ctypes.windll.kernel32.GetTickCount() - lii.dwTime
+        
+        return millis / 1000.0
+
+    def run_in_background(self):
+        while True:
+            idle_time = self.get_idle_duration()
+            print(f"System idle for {idle_time} seconds")
+            if idle_time < 5:  # For example, if the system has been idle for less than 5 seconds
+                print("Possibly just unlocked or still in use.")
+                # Place your logic here to launch the Tkinter app if conditions are met
+            time.sleep(1)
+
+
+class LASTINPUTINFO(ctypes.Structure):
+    _fields_ = [("cbSize", ctypes.c_uint),
+                ("dwTime", ctypes.c_uint)]
+
+
+    

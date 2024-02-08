@@ -48,8 +48,9 @@ class DatabaseManager:
 
         # Construct the CREATE TABLE SQL statement
         columns_sql = []
+        print(df)
         for col_name in df.columns:
-            col_type = 'TEXT'  # Default type; you might want to add logic to infer types or pass this as a parameter
+            col_type = 'TEXT'
             columns_sql.append(f"{col_name} {col_type}")
         create_table_sql = f"CREATE TABLE IF NOT EXISTS {table_name} ({', '.join(columns_sql)});"
         
@@ -116,26 +117,42 @@ class DatabaseManager:
             
             return None
 
+    def get_table_columns(self, table_name):
+        self.open()
+        self.cur.execute(f"PRAGMA table_info({table_name})")
+        columns = [info[1] for info in self.cur.fetchall()]  # Column names are in the second field
+        self.close()
+        return columns
+    
     def append_row_to_table(self, table_name, row):
         # If table doesn't exist, create it first
         if not self.table_exists(table_name):
             # Create table from row
             self.create_table_from_dataframe(pd.DataFrame([row], index=[0]), table_name)
         else:
-            # Open connection to db
-            self.open()
+            # Check that all of the columns in the insert are already in the table
+            existing_columns = self.get_table_columns(table_name)
+            missing_columns = [col for col in row.keys() if col not in existing_columns]
+
+            # Add any missing columns to the table
+            for col in missing_columns:
+                self.open()
+                self.cur.execute(f"ALTER TABLE {table_name} ADD COLUMN {col} TEXT")
+                self.conn.commit()
+                self.close()
+
             
-            # Create SQL query
+            # Create SQL query for row insert
             columns = ', '.join(row.keys())
             placeholders = ', '.join('?' * len(row))
             insert_sql = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
 
             # Execute SQL query
+            self.open()
             self.cur.execute(insert_sql, tuple(row.values()))
             self.conn.commit()
-
-            # Close connection
             self.close()
+            
 
 # Testing
 # processor = DataProcessor("data/app_database.db")
