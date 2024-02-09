@@ -48,13 +48,12 @@ class DatabaseManager:
 
         # Construct the CREATE TABLE SQL statement
         columns_sql = []
-        print(df)
         for col_name in df.columns:
             col_type = 'TEXT'
             columns_sql.append(f"{col_name} {col_type}")
         create_table_sql = f"CREATE TABLE IF NOT EXISTS {table_name} ({', '.join(columns_sql)});"
         
-        print(create_table_sql)
+        
 
         # Execute the CREATE TABLE SQL statement
         self.cur.execute(create_table_sql)
@@ -81,7 +80,6 @@ class DatabaseManager:
         # Close connection
         self.close()
         
-        print(table_names)
         return table_names
     
     def get_dataframe_from_table(self, table_name):
@@ -109,12 +107,9 @@ class DatabaseManager:
             self.close()
 
             return df
-        except Exception as e:
-            print(f"Error: {e}.")
-            
+        except Exception as e:            
             # Close the connection if an error occurs
             self.close()
-            
             return None
 
     def get_table_columns(self, table_name):
