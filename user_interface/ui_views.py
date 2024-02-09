@@ -62,7 +62,7 @@ class NewQuestionConfig(HomePage):
         self.colname = self.window.add_entry(1, 1)
 
         self.window.add_label('Question Type:', 2, 0)
-        self.q_type = self.window.add_dropdown(['Yes / No', 'Numeric'], 2, 1)
+        self.q_type = self.window.add_dropdown(['Yes / No'], 2, 1)
 
         self.window.add_button('Save', 3, 0, self.save_new_question)
 
