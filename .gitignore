@@ -1,3 +1,5 @@
 __pycache__/
 data/
-myvenv/
+.venv/
+build/
+main.spec

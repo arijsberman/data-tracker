@@ -4,6 +4,7 @@ import ctypes
 import time
 from datetime import date
 import pandas as pd
+import threading
 
 from user_interface.ui_views import HomePage, DataCollector
 from app_logic.database_manager import DatabaseManager
@@ -15,6 +16,7 @@ class AppController:
         self.db = DatabaseManager(DATABASE_PATH)
         self.config_data = self.db.get_dataframe_from_table('config_data')
         self.last_update = None
+        self.thread_stop_event = threading.Event()
         
     def open_home_page(self):
         # Initializing the app
@@ -26,16 +28,16 @@ class AppController:
         # Running the app
         root.mainloop()
 
+        # When home page closed, terminate the background process too
+        self.thread_stop_event.set()
+
     def run_data_collection(self):
-        # Initializing the app
-        root = tk.Tk()
-        root.withdraw()
-
         # Landing page
-        DataCollector(self, root, self.config_data)
+        DataCollector(self, self.home_page.master, self.config_data)
 
-        # Running the app
-        root.mainloop()
+        # Restart the home page after collecting data
+        self.home_page.master.destroy()
+        self.open_home_page()
 
     def save_new_question(self, question, colname, q_type):
         # Append new question to database
@@ -64,11 +66,12 @@ class AppController:
         millis = ctypes.windll.kernel32.GetTickCount() - lii.dwTime
         return millis / 1000.0
     
-    def check_for_interrupt(self):
-        if os.path.exists("interrupt.flag"):
-            os.remove("interrupt.flag")  # Remove the flag to reset the interrupt
-            return True
-        return False
+    # DEPRECATED
+    # def check_for_interrupt(self):
+    #     if os.path.exists("interrupt.flag"):
+    #         os.remove("interrupt.flag")  # Remove the flag to reset the interrupt
+    #         return True
+    #     return False
     
     def get_last_update(self):
         if self.db.table_exists('responses'):
@@ -77,17 +80,17 @@ class AppController:
             self.last_update = responses['datetime'].max().date()
 
     def run_in_background(self):
-        while True:
-            # If open menu shortcut is launched, open the main menu
-            if self.check_for_interrupt():
-                self.open_home_page()
+        def listen_for_user_input():
+            while not self.thread_stop_event.is_set():
+                # If computer is in use and the last response was before today, collect user data
+                if self.last_update is not None:
+                    if self.get_idle_duration() < 5 and self.last_update < date.today():
+                        self.run_data_collection()
 
-            # If computer is in use and the last response was before today, collect user data
-            if self.last_update is not None:
-                if self.get_idle_duration() < 5 and self.last_update < date.today():
-                    self.run_data_collection()
-
-            time.sleep(1)
+                time.sleep(1)
+        
+        self.thread = threading.Thread(target=listen_for_user_input)
+        self.thread.start()
 
 
 class LASTINPUTINFO(ctypes.Structure):

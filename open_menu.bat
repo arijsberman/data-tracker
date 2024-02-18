@@ -1,1 +1,0 @@
-echo. > interrupt.flag

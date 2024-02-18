@@ -14,14 +14,15 @@ class HomePage:
     def create_layout(self):
         self.window = MainWindow(self.master, layout=(2,2))
         self.window.add_button('Settings', 0, 0, self.open_settings_page)
-        self.window.add_button('Collect Data', 0, 1, self.collect_data)
+        self.window.add_button('Collect Data', 0, 1, self.controller.run_data_collection)
         self.window.add_label(f'Last update: {self.controller.last_update}', 1, 0, 2)
 
     def open_settings_page(self):
         self.settings_page = SettingsPage(self.controller, self.window.master, self.config)
 
-    def collect_data(self):
-        DataCollector(self.controller, self.window.master, self.config)
+    # DEPRECATED
+    # def collect_data(self):
+    #     DataCollector(self.controller, self.window.master, self.config)
 
     def update_config(self, new_config):
         # Update the config of the home page
@@ -82,6 +83,5 @@ class DataCollector(HomePage):
             self.controller.save_response(answer)
         else:
             messagebox.showerror('', "No data to collect")
-        
-        # Close app after collecting data
-        self.master.destroy()
+
+            
