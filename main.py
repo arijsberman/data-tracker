@@ -1,4 +1,8 @@
 from controller.app_controller import AppController
+import ctypes
+
+myappid = 'some.random.string.abcdefghijklmnopqrstuvwxyz' # arbitrary string
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
 def main():
 

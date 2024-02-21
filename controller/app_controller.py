@@ -21,6 +21,7 @@ class AppController:
     def open_home_page(self):
         # Initializing the app
         root = tk.Tk()
+        root.iconbitmap('images/yeah.ico')
 
         # Landing page
         self.home_page = HomePage(self, root, self.config_data)
