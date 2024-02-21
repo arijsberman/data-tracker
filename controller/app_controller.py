@@ -70,6 +70,7 @@ class AppController:
     def save_response(self, row_to_append):
         # Append user data to responses table
         print('Saving response data to database...')
+        print(row_to_append)
         self.db.append_row_to_table('responses', row_to_append)
 
         # Update the "last update" parameter of the app

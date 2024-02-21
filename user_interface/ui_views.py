@@ -1,6 +1,7 @@
 import pandas as pd
 from datetime import datetime 
 from tkinter import simpledialog, messagebox
+from datetime import date, timedelta
 
 from user_interface.ui_components import MainWindow, NewWindow
 
@@ -81,9 +82,18 @@ class DataCollector(HomePage):
     def create_layout(self):
         if isinstance(self.config, pd.DataFrame):
             answer = {}
-            answer['datetime'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            # Calculate last update + 1 day
+            if self.controller.last_update is not None: 
+                target_date = self.controller.last_update + timedelta(days=1)
+            else:
+                target_date = date.today()
+            # If last update + 1 day is < to today, collect data for that date
+            if target_date < date.today():
+                answer['datetime'] = (self.controller.last_update + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
+            else:
+                answer['datetime'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             for _, row in self.config.iterrows():
-                answer[row.colname] = messagebox.askquestion("Question", row.question)
+                answer[row.colname] = messagebox.askyesnocancel(f"Question: {answer['datetime']}", row.question)
             self.controller.save_response(answer)
         else:
             messagebox.showerror('', "No data to collect")
