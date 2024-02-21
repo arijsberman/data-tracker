@@ -15,7 +15,7 @@ class HomePage:
         self.window = MainWindow(self.master, layout=(2,2))
         self.window.add_button('Settings', 0, 0, self.open_settings_page)
         self.window.add_button('Collect Data', 0, 1, self.controller.run_data_collection)
-        self.window.add_label(f'Last update: {self.controller.last_update}', 1, 0, 2)
+        self.last_update_label = self.window.add_label(f'Last update: {self.controller.last_update}', 1, 0, 2)
 
     def open_settings_page(self):
         self.settings_page = SettingsPage(self.controller, self.window.master, self.config)
@@ -69,8 +69,12 @@ class NewQuestionConfig(HomePage):
 
 
     def save_new_question(self):
-        self.controller.save_new_question(self.question.get(), self.colname.get(), self.q_type.get())
-        self.window.master.destroy()
+        validated = self.controller.check_new_question(self.question.get(), self.colname.get(), self.q_type.get())
+        if validated == 'NO ERROR':
+            self.controller.save_new_question(self.question.get(), self.colname.get(), self.q_type.get())
+            self.window.master.destroy()
+        else:
+            messagebox.showerror('', f'New question invalid: {validated.lower()}')
 
 
 class DataCollector(HomePage):
